@@ -10,5 +10,7 @@
     "filter_source":{
         "rfjp2" : "reframe_jp2.c",
         "j2kdec" : "dec_j2k.c"
-    }
+    },
+    "Format": ["JPEG 2000","j2k1"],
+    "licence_required":false
 }
