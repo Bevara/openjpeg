@@ -627,4 +627,5 @@ const GF_FilterRegister * EMSCRIPTEN_KEEPALIVE dynCall_j2kdec_register(GF_Filter
 #else
 	return NULL;
 #endif
+
 }
