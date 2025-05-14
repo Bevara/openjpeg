@@ -11,7 +11,7 @@ SET(OPENJPEG_SRC
 )
 
 SET(OPENJPEG_LIB
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/libopenjp2.a
+      ${CMAKE_CURRENT_SOURCE_DIR}/lib/libopenjp2.a
 )
 
 SET(OPENJPEG_INC
