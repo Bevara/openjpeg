@@ -8,6 +8,7 @@ add_definitions(-fpic)
 SET(OPENJPEG_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/reframe_jp2.c
         ${CMAKE_CURRENT_SOURCE_DIR}/dec_j2k.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/img.c
 )
 
 SET(OPENJPEG_LIB
