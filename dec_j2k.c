@@ -629,3 +629,9 @@ const GF_FilterRegister * EMSCRIPTEN_KEEPALIVE dynCall_j2kdec_register(GF_Filter
 #endif
 
 }
+
+#include "filter_register.h"
+__attribute__((constructor))
+void register_j2kdec(void) {
+    gf_filter_auto_register("j2kdec", dynCall_j2kdec_register);
+}

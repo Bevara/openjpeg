@@ -1,11 +1,11 @@
-/* 
+/*
 **
 ** This file is part of Bevara Access Filters.
-** 
+**
 ** This file is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation.
-** 
+**
 ** This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU General Public License along with this file. If not, see <https://www.gnu.org/licenses/>.
 */
 
@@ -453,4 +453,10 @@ GF_FilterRegister ReframeJP2Register = {
 const GF_FilterRegister * EMSCRIPTEN_KEEPALIVE dynCall_jp2_reframe_register(GF_FilterSession *session)
 {
 	return &ReframeJP2Register;
+}
+
+#include "filter_register.h"
+__attribute__((constructor))
+void register_jp2_reframe(void) {
+    gf_filter_auto_register("jp2_reframe", dynCall_jp2_reframe_register);
 }
