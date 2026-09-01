@@ -450,7 +450,7 @@ GF_FilterRegister ReframeJP2Register = {
 	.process = jp2_process,
 	.process_event = jp2_process_event};
 
-const GF_FilterRegister * EMSCRIPTEN_KEEPALIVE dynCall_jp2_reframe_register(GF_FilterSession *session)
+const GF_FilterRegister * EMSCRIPTEN_KEEPALIVE jp2_reframe_register(GF_FilterSession *session)
 {
 	return &ReframeJP2Register;
 }
@@ -458,5 +458,5 @@ const GF_FilterRegister * EMSCRIPTEN_KEEPALIVE dynCall_jp2_reframe_register(GF_F
 #include "filter_register.h"
 __attribute__((constructor))
 void register_jp2_reframe(void) {
-    gf_filter_auto_register("jp2_reframe", dynCall_jp2_reframe_register);
+    gf_filter_auto_register("jp2_reframe", jp2_reframe_register);
 }

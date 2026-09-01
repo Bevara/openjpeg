@@ -620,7 +620,7 @@ GF_FilterRegister J2KRegister = {
 
 #endif
 
-const GF_FilterRegister * EMSCRIPTEN_KEEPALIVE dynCall_j2kdec_register(GF_FilterSession *session)
+const GF_FilterRegister * EMSCRIPTEN_KEEPALIVE j2kdec_register(GF_FilterSession *session)
 {
 #ifdef GPAC_HAS_JP2
 	return &J2KRegister;
@@ -633,5 +633,5 @@ const GF_FilterRegister * EMSCRIPTEN_KEEPALIVE dynCall_j2kdec_register(GF_Filter
 #include "filter_register.h"
 __attribute__((constructor))
 void register_j2kdec(void) {
-    gf_filter_auto_register("j2kdec", dynCall_j2kdec_register);
+    gf_filter_auto_register("j2kdec", j2kdec_register);
 }
