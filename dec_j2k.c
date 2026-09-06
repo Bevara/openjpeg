@@ -76,6 +76,7 @@ typedef struct
 static GF_Err j2kdec_configure_pid(GF_Filter *filter, GF_FilterPid *pid, Bool is_remove)
 {
 	const GF_PropertyValue *p;
+	u32 enum_cs = 0;
 	GF_J2KCtx *ctx = gf_filter_get_udta(filter);
 
 	if (is_remove) {
@@ -106,6 +107,24 @@ skip_dsi:
 		d4cc = 0;
 		if (p->value.data.size>8)
 			d4cc = GF_4CC(p->value.data.ptr[4], p->value.data.ptr[5], p->value.data.ptr[6], p->value.data.ptr[7]);
+
+		/*colr, when present, tells us sRGB (16) from sYCC (18) before a single
+		frame has been decoded.*/
+		{
+			u32 sp = 0;
+			const u8 *dp = (const u8 *) p->value.data.ptr;
+			while (sp + 8 <= p->value.data.size) {
+				u32 bsz = ((u32)dp[sp]<<24) | ((u32)dp[sp+1]<<16) | ((u32)dp[sp+2]<<8) | dp[sp+3];
+				u32 bty = GF_4CC(dp[sp+4], dp[sp+5], dp[sp+6], dp[sp+7]);
+				if ((bty==GF_4CC('c','o','l','r')) && (sp + 11 <= p->value.data.size)) {
+					if (dp[sp+8]==1) /*meth 1: enumerated colour space*/
+						enum_cs = ((u32)dp[sp+11]<<24) | ((u32)dp[sp+12]<<16) | ((u32)dp[sp+13]<<8) | dp[sp+14];
+					break;
+				}
+				if (bsz < 8) break;
+				sp += bsz;
+			}
+		}
 
 		bs = gf_bs_new(p->value.data.ptr, p->value.data.size, GF_BITSTREAM_READ);
 		if ((d4cc==GF_4CC('i','h','d','r')) || (d4cc==GF_4CC('c','o','l','r'))) {
@@ -147,7 +166,14 @@ skip_dsi:
 			ctx->pixel_format = GF_PIXEL_ALPHAGREY;
 			break;
 		case 3:
-			ctx->pixel_format = GF_PIXEL_RGB;
+			/*The jp2h says which of the two three-component layouts this is:
+			the colr box carries an enumerated colour space, 16 for sRGB and 18
+			for sYCC. Getting it right here rather than on the first decoded
+			frame is what lets an encoder be linked at all - the graph is
+			resolved from the properties the pid declares at configure time,
+			and a pid that says RGB is one mp4mx will happily take as
+			uncompressed video, leaving the encoder unconnected.*/
+			ctx->pixel_format = (enum_cs == 18) ? GF_PIXEL_YUV : GF_PIXEL_RGB;
 			break;
 		case 4:
 			ctx->pixel_format = GF_PIXEL_RGBA;
@@ -315,6 +341,33 @@ static GF_Err j2kdec_process(GF_Filter *filter)
 	if (size>=8) {
 		if ((data[4]=='j') && (data[5]=='p') && (data[6]=='2') && (data[7]=='c'))
 			start_offset = 8;
+		/*A Motion JPEG 2000 sample may be a whole JP2 file rather than a bare
+		codestream - ffmpeg's mjp2 muxer writes it that way, signature box then
+		ftyp, jp2h and only then jp2c. Walk the boxes to the codestream instead
+		of assuming it comes first; without this openjpeg reports "Expected a
+		SOC marker" on every frame.*/
+		else if ((data[4]=='j') && (data[5]=='P') && (data[6]==' ') && (data[7]==' ')) {
+			u32 pos = 0;
+			while (pos + 8 <= size) {
+				u64 bsize = ((u32)data[pos]<<24) | ((u32)data[pos+1]<<16) | ((u32)data[pos+2]<<8) | (u8)data[pos+3];
+				u32 btype = GF_4CC(data[pos+4], data[pos+5], data[pos+6], data[pos+7]);
+				u32 hdr = 8;
+				if (bsize==1) {
+					if (pos + 16 > size) break;
+					bsize = 0;
+					{ u32 k; for (k=0; k<8; k++) bsize = (bsize<<8) | (u8)data[pos+8+k]; }
+					hdr = 16;
+				} else if (!bsize) {
+					bsize = size - pos; /*box runs to the end*/
+				}
+				if (btype==GF_4CC('j','p','2','c')) {
+					start_offset = pos + hdr;
+					break;
+				}
+				if ((bsize < hdr) || (pos + bsize > size)) break;
+				pos += (u32) bsize;
+			}
+		}
 	}
 
 	GF_SAFEALLOC(parameters, opj_dparameters_t);
@@ -448,7 +501,14 @@ static GF_Err j2kdec_process(GF_Filter *filter)
 		if ((u64)ctx->width * ctx->height * ctx->nb_comp > (u64)GF_UINT_MAX) {
 			return GF_BAD_PARAM;
 		}
-		ctx->out_size = ctx->width * ctx->height * ctx->nb_comp ;
+		/*A YUV 4:2:0 frame is w*h*3/2, not w*h*3: the subsampled case above had
+		already worked that out, and this line used to undo it. The packet was
+		then allocated three times too large and only half written, so what
+		reached the rest of the graph was half a picture followed by whatever
+		the allocator had left there.*/
+		ctx->out_size = (ctx->pixel_format == GF_PIXEL_YUV)
+			? (ctx->width * ctx->height * 3 / 2)
+			: (ctx->width * ctx->height * ctx->nb_comp);
 		gf_filter_pid_set_property(ctx->opid, GF_PROP_PID_STRIDE, &PROP_UINT( (ctx->pixel_format == GF_PIXEL_YUV) ? ctx->width : ctx->width * ctx->nb_comp) );
 	}
 
