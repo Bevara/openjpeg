@@ -12,5 +12,6 @@
         "j2kdec" : "dec_j2k.c"
     },
     "Format": ["JPEG 2000","j2k1"],
-    "licence_required":false
+    "licence_required":false,
+    "using": ["solver_minimal_1", "solver_1"]
 }
