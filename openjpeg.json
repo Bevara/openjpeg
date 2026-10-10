@@ -13,5 +13,21 @@
     },
     "Format": ["JPEG 2000","j2k1"],
     "licence_required":false,
-    "using": ["solver_minimal_1", "solver_1"]
+    "using": ["solver_minimal_1", "solver_1"],
+    "runtime": {
+        "j2kdec": {
+            "outputs": [
+                {
+                    "property": "GF_PROP_PID_PIXFMT",
+                    "format": [
+                        "GF_PIXEL_GREYSCALE",
+                        "GF_PIXEL_ALPHAGREY",
+                        "GF_PIXEL_RGBA",
+                        "GF_PIXEL_RGB",
+                        "GF_PIXEL_YUV"
+                    ]
+                }
+            ]
+        }
+    }
 }
