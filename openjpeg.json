@@ -12,7 +12,6 @@
         "j2kdec" : "dec_j2k.c"
     },
     "Format": ["JPEG 2000","j2k1"],
-    "licence_required":false,
     "using": ["solver_minimal_1", "solver_1"],
     "runtime": {
         "j2kdec": {
@@ -29,5 +28,10 @@
                 }
             ]
         }
+    },
+    "patents": {
+        "status": "royalty-free",
+        "note": "JPEG 2000 Part 1, royalty-free",
+        "checked": "2026-10-16"
     }
 }
