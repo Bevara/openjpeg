@@ -1,6 +1,6 @@
 {
     "name": "openjpeg",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "JP2000 decoder",
     "filters":["rfjp2","j2kdec"],
     "help": "This filter decodes JPEG2000 streams through OpenJPEG library.",
@@ -13,7 +13,7 @@
         "j2kdec" : "dec_j2k.c"
     },
     "Format": ["JPEG 2000","j2k1"],
-    "using": ["solver_minimal_1", "solver_1"],
+    "using": ["mm_solver_minimal_1.0.1", "mm_solver_1.0.1"],
     "runtime": {
         "j2kdec": {
             "outputs": [
