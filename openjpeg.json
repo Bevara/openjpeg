@@ -13,7 +13,7 @@
         "j2kdec" : "dec_j2k.c"
     },
     "Format": ["JPEG 2000","j2k1"],
-    "using": ["mm_solver_minimal_1.0.1", "mm_solver_1.0.1", "mm_solver_1.0.2"],
+    "using": ["mm_solver_minimal_1.0.1", "mm_solver_1.0.1", "mm_solver_1.0.2", "mm_solver_1.0.3", "mm_solver_1.0.4"],
     "runtime": {
         "j2kdec": {
             "outputs": [
